@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GridEscape 🗺️</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================
+       PANTALLA DE INICIO
+  ============================= -->
+  <div id="start-screen" class="overlay-screen active">
+    <div class="screen-card">
+      <h1>🗺️ GridEscape</h1>
+      <p class="subtitle">Llega a la salida… si puedes escapar del villano.</p>
+      <button id="btn-start" class="btn btn-primary">▶ Comenzar</button>
+      <a class="btn btn-secondary" href="generator.html" style="margin-top:0.5rem; text-decoration:none; text-align:center; display:block;">🛠️ Level Workshop</a>
+    </div>
+  </div>
+
+  <!-- ============================
+       MODAL: NIVEL COMPLETADO
+  ============================= -->
+  <div id="modal-win" class="overlay-screen">
+    <div class="screen-card">
+      <h2>🎉 ¡Nivel Completado!</h2>
+      <p id="win-moves-text">Movimientos: 0</p>
+      <button id="btn-next-level" class="btn btn-primary">Siguiente Nivel →</button>
+    </div>
+  </div>
+
+  <!-- ============================
+       MODAL: GAME OVER
+  ============================= -->
+  <div id="modal-lose" class="overlay-screen">
+    <div class="screen-card">
+      <h2>💀 Game Over</h2>
+      <p>El villano te ha atrapado.</p>
+      <button id="btn-restart" class="btn btn-danger">↺ Reiniciar Nivel</button>
+    </div>
+  </div>
+
+  <!-- ============================
+       MODAL: JUEGO COMPLETADO
+  ============================= -->
+  <div id="modal-complete" class="overlay-screen">
+    <div class="screen-card">
+      <h2>🏆 ¡Juego Completado!</h2>
+      <p>Has superado todos los niveles. ¡Eres increíble!</p>
+      <button id="btn-play-again" class="btn btn-primary">🔄 Jugar de Nuevo</button>
+    </div>
+  </div>
+
+  <!-- ============================
+       CONTENEDOR PRINCIPAL
+  ============================= -->
+  <div id="app">
+
+    <!-- HUD Superior -->
+    <header id="hud">
+      <div class="hud-item">
+        <span class="hud-label">Nivel</span>
+        <span id="hud-level" class="hud-value">1</span>
+      </div>
+      <div class="hud-item hud-center">
+        <span id="hud-biome" class="hud-biome-name">Jungla</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Movimientos</span>
+        <span id="hud-moves" class="hud-value">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Poder</span>
+        <span id="hud-power" class="hud-value power-badge">—</span>
+      </div>
+    </header>
+
+    <!-- Leyenda de Power-ups -->
+    <div id="legend">
+      <span class="legend-item" title="Sprint: 2 movimientos">⚡ Sprint</span>
+      <span class="legend-item" title="Congelar: Villano inmóvil 2 turnos">❄️ Congelar</span>
+      <span class="legend-item" title="Escudo: Absorbe 1 ataque">🛡️ Escudo</span>
+      <label class="legend-item legend-toggle" title="Mostrar u ocultar los controles táctiles">
+        <input type="checkbox" id="toggle-controls"> 🕹️ Controles
+      </label>
+    </div>
+
+    <!-- Canvas para Three.js (reemplaza el tablero 2D) -->
+    <main id="game-container">
+      <div id="canvas-wrap">
+        <canvas id="canvas-3d"></canvas>
+        <!-- Indicadores de dirección isométrica -->
+        <div class="dir-label dir-n" title="Tecla ↑"><kbd>↑</kbd> <span class="dir-arrow">↗</span></div>
+        <div class="dir-label dir-e" title="Tecla →"><kbd>→</kbd> <span class="dir-arrow">↘</span></div>
+        <div class="dir-label dir-s" title="Tecla ↓"><kbd>↓</kbd> <span class="dir-arrow">↙</span></div>
+        <div class="dir-label dir-w" title="Tecla ←"><kbd>←</kbd> <span class="dir-arrow">↖</span></div>
+      </div>
+    </main>
+
+    <!-- Controles táctiles -->
+    <div id="touch-controls">
+      <div class="touch-row">
+        <button class="touch-btn" data-dir="up"   aria-label="Arriba">▲</button>
+      </div>
+      <div class="touch-row">
+        <button class="touch-btn" data-dir="left"  aria-label="Izquierda">◀</button>
+        <button class="touch-btn touch-center" data-dir="none" aria-label="Esperar">·</button>
+        <button class="touch-btn" data-dir="right" aria-label="Derecha">▶</button>
+      </div>
+      <div class="touch-row">
+        <button class="touch-btn" data-dir="down"  aria-label="Abajo">▼</button>
+      </div>
+    </div>
+
+  </div><!-- /app -->
+
+  <!-- Three.js desde CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.min.js"></script>
+  <!-- GSAP para animaciones suaves -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <script src="renderer3d.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

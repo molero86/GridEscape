@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level Workshop - Grid Escape</title>
+  <link rel="stylesheet" href="shared-styles.css" />
+  <style>
+    #workshop-app {
+      height: 100dvh;
+      max-height: 100dvh;
+      padding: clamp(0.55rem, 1.2vw, 1rem);
+      display: grid;
+      grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+      gap: clamp(0.5rem, 1vw, 1rem);
+      overflow: hidden;
+    }
+
+    #side-panel {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-height: 0;
+      overflow: auto;
+      position: sticky;
+      top: clamp(0.55rem, 1.2vw, 1rem);
+    }
+
+    .side-title {
+      font-size: 1.1rem;
+      margin: 0 0 0.4rem;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.45rem;
+      margin-top: 0.35rem;
+    }
+
+    #content-zone {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(0.5rem, 1vw, 1rem);
+      min-width: 0;
+      min-height: 0;
+    }
+
+    #preview-card {
+      padding: 0.9rem;
+      display: grid;
+      gap: 0.6rem;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    #preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    #preview-meta {
+      display: flex;
+      gap: 0.35rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    #validation-message {
+      min-height: 1.2rem;
+      font-size: 0.85rem;
+      color: #ffd4d4;
+    }
+
+    #edit-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    .tool-btn {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 0.25rem 0.45rem;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.2;
+      transition: filter 0.12s ease, transform 0.12s ease, border-color 0.12s ease;
+    }
+
+    .tool-btn:hover {
+      filter: brightness(1.08);
+    }
+
+    .tool-btn.active {
+      border-color: var(--accent);
+      background: color-mix(in oklab, var(--accent) 22%, rgba(0, 0, 0, 0.18));
+    }
+
+    #preview-grid-wrap {
+      overflow: hidden;
+      min-height: 0;
+      height: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.6rem;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    #preview-grid {
+      --cell-size: 30px;
+      display: grid;
+      gap: 4px;
+      width: fit-content;
+      margin: 0 auto;
+      padding: 0.2rem;
+    }
+
+    .preview-cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: clamp(0.72rem, calc(var(--cell-size) * 0.45), 0.95rem);
+      user-select: none;
+      cursor: pointer;
+      transition: transform 0.1s ease, filter 0.15s ease;
+      background: var(--cell-empty, #3a7a30);
+    }
+
+    .preview-cell:hover {
+      transform: scale(1.06);
+      filter: brightness(1.08);
+    }
+
+    #vault-card {
+      padding: 0.9rem;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 0.7rem;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    #vault-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 0.7rem;
+      overflow: auto;
+      min-height: 0;
+      align-content: start;
+      padding-right: 0.2rem;
+    }
+
+    .vault-item {
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 0.7rem;
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .vault-title {
+      margin: 0;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .vault-meta {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .vault-actions {
+      display: flex;
+      gap: 0.45rem;
+    }
+
+    .vault-empty {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    body.workshop-biome-bosque {
+      --bg-outer: #10241a;
+      --bg-panel: #183526ee;
+      --accent: #6de27d;
+      --cell-empty: #376941;
+    }
+
+    body.workshop-biome-desierto {
+      --bg-outer: #5f4513;
+      --bg-panel: #7e5e20ee;
+      --accent: #ffba5f;
+      --cell-empty: #c4923d;
+    }
+
+    body.workshop-biome-nieve {
+      --bg-outer: #1f4468;
+      --bg-panel: #2f5f8eee;
+      --accent: #9cd5ff;
+      --cell-empty: #87b6d8;
+    }
+
+    body.workshop-biome-espacio {
+      --bg-outer: #0c1028;
+      --bg-panel: #19214cee;
+      --accent: #80b3ff;
+      --cell-empty: #2b386f;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        overflow: auto;
+      }
+
+      #workshop-app {
+        height: auto;
+        max-height: none;
+        min-height: 100dvh;
+        grid-template-columns: 1fr;
+        overflow: visible;
+      }
+
+      #side-panel {
+        position: static;
+        overflow: visible;
+      }
+
+      #content-zone {
+        grid-template-rows: auto auto;
+      }
+
+      #preview-grid-wrap {
+        max-height: 52dvh;
+      }
+
+      #vault-card {
+        overflow: visible;
+      }
+
+      #vault-grid {
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 640px) {
+      #workshop-app {
+        padding: 0.45rem;
+      }
+
+      #side-panel,
+      #preview-card,
+      #vault-card {
+        padding: 0.7rem;
+      }
+
+      #preview-grid-wrap {
+        padding: 0.4rem;
+      }
+
+      #vault-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions .btn {
+        padding: 0.55rem 0.7rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body class="workshop-biome-bosque">
+  <div id="workshop-app">
+    <aside id="side-panel" class="card">
+      <h1 class="side-title">Level Workshop</h1>
+
+      <div class="field">
+        <label for="level-name">Nombre del nivel</label>
+        <input id="level-name" type="text" maxlength="40" placeholder="Ej: Pasillo de Dunas" />
+      </div>
+
+      <div class="field">
+        <label for="biome-select">Bioma</label>
+        <select id="biome-select">
+          <option value="bosque">Bosque</option>
+          <option value="desierto">Desierto</option>
+          <option value="nieve">Nieve</option>
+          <option value="espacio">Espacio</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="difficulty-select">Dificultad</label>
+        <select id="difficulty-select">
+          <option value="easy">Easy</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard</option>
+          <option value="nightmare">Nightmare</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="grid-size">Tamaño del tablero</label>
+        <select id="grid-size">
+          <option value="8">8 x 8</option>
+          <option value="9">9 x 9</option>
+          <option value="10" selected>10 x 10</option>
+          <option value="11">11 x 11</option>
+          <option value="12">12 x 12</option>
+          <option value="13">13 x 13</option>
+          <option value="14">14 x 14</option>
+          <option value="15">15 x 15</option>
+        </select>
+      </div>
+
+      <div class="actions">
+        <button id="btn-generate" class="btn btn-primary">Generar Borrador Aleatorio</button>
+        <button id="btn-save" class="btn btn-secondary">Guardar en Workshop</button>
+        <button id="btn-clear" class="btn btn-danger">Limpiar Todo</button>
+      </div>
+    </aside>
+
+    <section id="content-zone">
+      <article id="preview-card" class="card">
+        <div id="preview-header">
+          <strong>Preview de Nivel</strong>
+          <div id="preview-meta">
+            <span id="biome-badge" class="badge">Bosque</span>
+            <span id="difficulty-badge" class="badge">Normal</span>
+          </div>
+        </div>
+        <div id="validation-message" aria-live="polite"></div>
+        <div id="edit-tools" aria-label="Herramientas de edición">
+          <button type="button" class="tool-btn active" data-tool="wall">🌲 Muro</button>
+          <button type="button" class="tool-btn" data-tool="erase">🧽 Borrar</button>
+          <button type="button" class="tool-btn" data-tool="hero">🦸 Héroe</button>
+          <button type="button" class="tool-btn" data-tool="villain">👾 Villano</button>
+          <button type="button" class="tool-btn" data-tool="exit">🏁 Salida</button>
+          <button type="button" class="tool-btn" data-tool="booster-sprint">⚡ Sprint</button>
+          <button type="button" class="tool-btn" data-tool="booster-freeze">❄️ Freeze</button>
+          <button type="button" class="tool-btn" data-tool="booster-shield">🛡️ Shield</button>
+        </div>
+        <div id="preview-grid-wrap">
+          <div id="preview-grid"></div>
+        </div>
+      </article>
+
+      <article id="vault-card" class="card">
+        <strong>The Vault</strong>
+        <div id="vault-grid"></div>
+      </article>
+    </section>
+  </div>
+
+  <script src="generator.js"></script>
+</body>
+</html>
