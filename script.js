@@ -877,6 +877,39 @@ class Game {
       });
     });
 
+    // ── Gestos swipe en móvil (sobre el canvas) ──
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let trackingSwipe = false;
+
+    this.canvasEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      trackingSwipe = true;
+    }, { passive: true });
+
+    this.canvasEl.addEventListener('touchend', (e) => {
+      if (!trackingSwipe || e.changedTouches.length === 0) return;
+      trackingSwipe = false;
+
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const dx = endX - touchStartX;
+      const dy = endY - touchStartY;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+      const minSwipe = 24;
+
+      if (absDx < minSwipe && absDy < minSwipe) return;
+
+      if (absDx >= absDy) {
+        this.moveHero(dx > 0 ? 'right' : 'left');
+      } else {
+        this.moveHero(dy > 0 ? 'down' : 'up');
+      }
+    }, { passive: true });
+
     // ── Modales ──
     document.getElementById('btn-next-level').addEventListener('click', () => {
       this._hideModals();
